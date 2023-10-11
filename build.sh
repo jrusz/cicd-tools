@@ -10,6 +10,13 @@
 #IMAGE_TAG="abcd123" -- image tag to push to
 #APP_ROOT="/path/to/app/root" -- path to the cloned app repo
 
+# if this is a PR, use a different tag, since PR tags expire
+if [ ! -z "$ghprbPullId" ]; then
+  export IMAGE_TAG="pr-${ghprbPullId}-${IMAGE_TAG}"
+elif [ ! -z "$gitlabMergeRequestIid" ]; then
+  export IMAGE_TAG="pr-${gitlabMergeRequestIid}-${IMAGE_TAG}"
+fi
+
 # Env vars for local use
 CMD_OPTS="-t ${IMAGE}:${IMAGE_TAG}"
 set -e
@@ -38,6 +45,7 @@ function build {
     fi
 
     if is_pr_or_mr_build; then
+        echo "TAG in build.sh: $IMAGE_TAG"
         add_expiry_label_to_file "$DOCKERFILE_PATH" "$QUAY_EXPIRE_TIME"
         IMAGE_TAG_LATEST="$(cut -d "-" -f 1,2 <<< $IMAGE_TAG)-latest"
         CMD_OPTS+=" -t ${IMAGE}:${IMAGE_TAG_LATEST} --build-arg TEST_IMAGE=true"

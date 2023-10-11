@@ -45,16 +45,6 @@ mkdir $KUBECONFIG_DIR
 
 set +x
 
-# if this is a PR, use a different tag, since PR tags expire
-if [ ! -z "$ghprbPullId" ]; then
-  export IMAGE_TAG="pr-${ghprbPullId}-${IMAGE_TAG}"
-fi
-
-if [ ! -z "$gitlabMergeRequestIid" ]; then
-  export IMAGE_TAG="pr-${gitlabMergeRequestIid}-${IMAGE_TAG}"
-fi
-
-
 export GIT_COMMIT=$(git rev-parse HEAD)
 export ARTIFACTS_DIR="$WORKSPACE/artifacts"
 
